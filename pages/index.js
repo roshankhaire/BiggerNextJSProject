@@ -16,12 +16,21 @@ const DUMMY_MEETUPS=[
         discription:"This is a second metup!"
     }
 ]
-function HomePage(){
+function HomePage(props){
+
     return(
        
-       <MeetupList meetups={DUMMY_MEETUPS}/>
+       <MeetupList meetups={props.meetups}/>
       
              
     )
+}
+export async function getStaticProps(){
+    return{
+        props:{
+            meetups:DUMMY_MEETUPS
+        },
+        revalidate:10
+    }
 }
 export default HomePage;
