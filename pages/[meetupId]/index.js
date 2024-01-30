@@ -1,43 +1,41 @@
 import { Fragment } from "react"
 import MeetupDetail from "../../components/meetups/MeetupDetail"
-function MeetupDetails(){
+import { MongoClient ,ObjectId} from "mongodb"
+function MeetupDetails(props){
   return(
-    <MeetupDetail image="https://upload.wikimedia.org/wikipedia/commons/d/d3/Stadtbild_M%C3%BCnchen.jpg"
-       title="first Meetup" address="Some in 5,Newyork" description="Meetup Description"/>
+    <MeetupDetail image={props.meetupData.image}
+       title={props.meetupData.title} address={props.meetupData.title} description={props.meetupData.description}/>
   )
 }
 export async  function getStaticPaths(){
+  const client=MongoClient.connect("mongodb+srv://roshankhaire1992 :lordbuddha@cluster0.4tt52ji.mongodb.net/meetups?retryWrites=true&w=majority")
+  const db=client.db();
+  const meetupsCollection=db.collection("meetups");
+  const meetups=meetupsCollection.find({},{_id:1}).toArray();
+   client.close()
   return {
     fallback:false,
-    paths:[{
-      params:{
-        meetupId:"m1"
-      }
-    },
-    {
-      params:{
-        meetupId:"m2"
-      }
-    },  {
-      params:{
-        meetupId:"m3"
-      }
-    }
-  ]
+    paths: meetups.map(meetup=>({params:{
+      meetupId:meetup>_id.toString()
+    }}))
+ 
   }
 }
 export async function getStaticProps(context){
       const meetupId=context.params.meetupId;
       // console.log(meetupId)
+      const client=MongoClient.connect("mongodb+srv://roshankhaire1992 :lordbuddha@cluster0.4tt52ji.mongodb.net/meetups?retryWrites=true&w=majority")
+      const db=client.db();
+      const meetupsCollection=db.collection("meetups");
+     const selectMeetups= await meetupsCollection.findOne({_id:ObjectId(meetupId)})
+       client.close()
     return{
       props:{
         meetupData:{
-             image:"https://upload.wikimedia.org/wikipedia/commons/d/d3/Stadtbild_M%C3%BCnchen.jpg",
-             id:meetupId,
-             title:"first Meetup",
-             address:"Some in 5,Newyork",
-             description:"Meetup Description"
-
+          id:selectMeetups._id.toString(),
+          title:selectMeetups.title,
+           address:selectMeetups.address,
+           description:selectMeetups.description,
         }
       }
     }
